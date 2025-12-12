@@ -1,4 +1,4 @@
-# Sweet Shop Management System - Setup Guide
+# Sweet Shop Management System 
 
 ## Tech Stack
 - **Backend**: Node.js with TypeScript, Express
