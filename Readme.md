@@ -5,7 +5,7 @@
 - **Database**: PostgreSQL
 - **Authentication**: JWT (jsonwebtoken)
 - **Testing**: Jest + Supertest
-- **ORM**: Prisma (or TypeORM - your choice)
+- **ORM**: Prisma
 
 ## Initial Setup Steps
 
