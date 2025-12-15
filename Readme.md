@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # 🍬 Sweet Shop Management System
+=======
+# Sweet Shop Management System 
+>>>>>>> 6d9ee45c3b1c50d84f4dfeb638c7ecf843a08400
 
 A full-stack sweet shop management system built with Node.js, TypeScript, Express, and React, following Test-Driven Development (TDD) principles.
 
@@ -40,6 +44,10 @@ A full-stack sweet shop management system built with Node.js, TypeScript, Expres
 - **Authentication**: JWT (jsonwebtoken)
 - **Password Hashing**: bcrypt
 - **Testing**: Jest + Supertest
+<<<<<<< HEAD
+=======
+- **ORM**: Prisma
+>>>>>>> 6d9ee45c3b1c50d84f4dfeb638c7ecf843a08400
 
 ### Frontend
 - **Framework**: React with TypeScript
