@@ -1,7 +1,6 @@
-import { Prisma } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import prisma from "../config/database";
 
-// Prisma model types (Prisma 7 syntax)
 type Sweet = Prisma.SweetGetPayload<{}>;
 
 interface CreateSweetData {
@@ -26,7 +25,7 @@ interface SearchParams {
 }
 
 export class SweetsService {
-  private prisma = prisma;
+  constructor(private prismaClient: PrismaClient = prisma) {}
 
   async createSweet(data: CreateSweetData): Promise<Sweet> {
     if (data.price <= 0) {
@@ -37,13 +36,13 @@ export class SweetsService {
       throw new Error("Quantity cannot be negative");
     }
 
-    return await this.prisma.sweet.create({
+    return await this.prismaClient.sweet.create({
       data,
     });
   }
 
   async getAllSweets(): Promise<Sweet[]> {
-    return await this.prisma.sweet.findMany({
+    return await this.prismaClient.sweet.findMany({
       orderBy: { createdAt: "desc" },
     });
   }
@@ -75,7 +74,7 @@ export class SweetsService {
       }
     }
 
-    return await this.prisma.sweet.findMany({ where });
+    return await this.prismaClient.sweet.findMany({ where });
   }
 
   async updateSweet(id: string, data: UpdateSweetData): Promise<Sweet> {
@@ -87,14 +86,14 @@ export class SweetsService {
       throw new Error("Quantity cannot be negative");
     }
 
-    return await this.prisma.sweet.update({
+    return await this.prismaClient.sweet.update({
       where: { id },
       data,
     });
   }
 
   async deleteSweet(id: string): Promise<Sweet> {
-    return await this.prisma.sweet.delete({
+    return await this.prismaClient.sweet.delete({
       where: { id },
     });
   }
@@ -104,7 +103,7 @@ export class SweetsService {
       throw new Error("Purchase quantity must be positive");
     }
 
-    const sweet = await this.prisma.sweet.findUnique({
+    const sweet = await this.prismaClient.sweet.findUnique({
       where: { id },
     });
 
@@ -116,7 +115,7 @@ export class SweetsService {
       throw new Error("Insufficient quantity available");
     }
 
-    return await this.prisma.sweet.update({
+    return await this.prismaClient.sweet.update({
       where: { id },
       data: {
         quantity: sweet.quantity - quantity,
@@ -129,7 +128,7 @@ export class SweetsService {
       throw new Error("Restock quantity must be positive");
     }
 
-    const sweet = await this.prisma.sweet.findUnique({
+    const sweet = await this.prismaClient.sweet.findUnique({
       where: { id },
     });
 
@@ -137,7 +136,7 @@ export class SweetsService {
       throw new Error("Sweet not found");
     }
 
-    return await this.prisma.sweet.update({
+    return await this.prismaClient.sweet.update({
       where: { id },
       data: {
         quantity: sweet.quantity + quantity,

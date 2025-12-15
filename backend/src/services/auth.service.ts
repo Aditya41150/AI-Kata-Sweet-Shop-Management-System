@@ -4,8 +4,6 @@ import prisma from "../config/database";
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-type User = Prisma.UserGetPayload<{}>;
-
 export class AuthService {
   private prisma = prisma;
   private jwtSecret = process.env.TOKEN_SECRET || "your-secret-key";
