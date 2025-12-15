@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 # 🍬 Sweet Shop Management System
-=======
 # Sweet Shop Management System 
->>>>>>> 6d9ee45c3b1c50d84f4dfeb638c7ecf843a08400
 
 A full-stack sweet shop management system built with Node.js, TypeScript, Express, and React, following Test-Driven Development (TDD) principles.
 
@@ -497,22 +494,20 @@ AI was an invaluable tool in this project, functioning as an intelligent assista
 ## 📸 Screenshots
 
 ### User Registration
-![Registration Page](./screenshots/register.png)
+<img width="1912" height="877" alt="Screenshot 2025-12-15 122600" src="https://github.com/user-attachments/assets/95b149e7-ec1d-473d-a428-0bcd40373336" />
 
 ### Login Page
-![Login Page](./screenshots/login.png)
+<img width="1916" height="868" alt="Screenshot 2025-12-15 122550" src="https://github.com/user-attachments/assets/bcf5eb15-12ce-4fa7-82ff-3be3ae518c4e" />
+
 
 ### Dashboard (User View)
-![Dashboard](./screenshots/dashboard.png)
+<img width="1919" height="867" alt="Screenshot 2025-12-15 123217" src="https://github.com/user-attachments/assets/6b95aaad-a69c-4224-8e22-5b8c23eb079b" />
 
 ### Admin Panel
-![Admin Panel](./screenshots/admin.png)
+<img width="1919" height="871" alt="Screenshot 2025-12-15 122614" src="https://github.com/user-attachments/assets/bda0fbf0-491c-4d5e-921d-cc2af7a89255" />
 
 ### Sweet Details
-![Sweet Details](./screenshots/sweet-details.png)
-
-### Search & Filter
-![Search](./screenshots/search.png)
+<img width="1919" height="876" alt="Screenshot 2025-12-15 122628" src="https://github.com/user-attachments/assets/9c049602-baa7-4cac-bc5c-db5367d0bd62" />
 
 ## 🚀 Deployment
 
@@ -525,13 +520,6 @@ AI was an invaluable tool in this project, functioning as an intelligent assista
    git push heroku main
    ```
 
-### Frontend Deployment (Vercel/Netlify)
-
-1. Update `VITE_API_URL` to production URL
-2. Deploy:
-   ```bash
-   vercel deploy
-   ```
 
 ## 📝 License
 
@@ -540,14 +528,9 @@ This project is licensed under the MIT License.
 ## 👤 Author
 
 Your Name
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+- GitHub: [@Aditya41150](https://github.com/Aditya41150)
+- Email: singhadi437@gmail.com 
 
-## 🙏 Acknowledgments
-
-- Built with guidance from Anthropic's Claude AI
-- Inspired by modern e-commerce systems
-- Thanks to the open-source community
 
 ---
 
