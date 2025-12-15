@@ -1,9 +1,5 @@
-import React, { useState, useEffect } from "react";
-import "./App.css";
-
-// =========================
-// Types
-// =========================
+import React, { useState, useEffect } from 'react';
+import './App.css';
 
 interface User {
   id: string;
@@ -28,84 +24,55 @@ interface AuthContextType {
   logout: () => void;
 }
 
-// Backend URL from Netlify
 const API_URL = import.meta.env.VITE_API_URL;
 
-// =========================
-// Dark Mode
-// =========================
-
-const DarkModeContext = React.createContext<any>(null);
-
-const DarkModeProvider = ({ children }: any) => {
-  const [dark, setDark] = useState(
-    localStorage.getItem("darkMode") === "true"
-  );
-
-  useEffect(() => {
-    if (dark) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-
-    localStorage.setItem("darkMode", String(dark));
-  }, [dark]);
-
-  return (
-    <DarkModeContext.Provider value={{ dark, setDark }}>
-      {children}
-    </DarkModeContext.Provider>
-  );
-};
-
-const useDarkMode = () => React.useContext(DarkModeContext);
-
-// =========================
 // Auth Context
-// =========================
-
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
 
-const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [user, setUser] = useState<User | null>(
-    JSON.parse(localStorage.getItem("user") || "null")
-  );
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("token")
-  );
+const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+
+  useEffect(() => {
+    if (token) {
+      const userData = localStorage.getItem('user');
+      if (userData) setUser(JSON.parse(userData));
+    }
+  }, [token]);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch(`${API_URL}/api/auth/login`, {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password })
     });
 
-    if (!res.ok) throw new Error("Login failed");
+    if (!response.ok) throw new Error("Login failed");
 
-    const data = await res.json();
-    setUser(data.user);
+    const data = await response.json();
     setToken(data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    setUser(data.user);
     localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
   };
 
   const register = async (email: string, password: string, name: string) => {
-    const res = await fetch(`${API_URL}/api/auth/register`, {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ email, password, name })
     });
 
-    if (!res.ok) throw new Error("Registration failed");
+    if (!response.ok) throw new Error("Registration failed");
 
     await login(email, password);
   };
 
   const logout = () => {
-    setUser(null);
     setToken(null);
-    localStorage.clear();
+    setUser(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (
@@ -116,125 +83,142 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 };
 
 const useAuth = () => {
-  const ctx = React.useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be inside AuthProvider");
-  return ctx;
+  const context = React.useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;
 };
 
-// =========================
 // Login Component
-// =========================
-
 const Login: React.FC<{ onToggle: () => void }> = ({ onToggle }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [err, setErr] = useState("");
 
-  const submit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     try {
-      setErr("");
       await login(email, password);
     } catch {
-      setErr("Invalid credentials");
+      setError('Invalid credentials');
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>🍬 Sweet Shop</h1>
+        <div className="auth-header">
+          <div className="emoji">🍬</div>
+          <h1>Sweet Shop</h1>
+          <p>Welcome back!</p>
+        </div>
 
-        <form onSubmit={submit}>
-          {err && <div className="error">{err}</div>}
+        <form onSubmit={handleSubmit} className="auth-form">
+          {error && <div className="error-message">{error}</div>}
 
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="form-group">
+            <label>Email</label>
+            <input type="email" value={email}
+              onChange={(e) => setEmail(e.target.value)} required />
+          </div>
 
-          <input
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="form-group">
+            <label>Password</label>
+            <input type="password" value={password}
+              onChange={(e) => setPassword(e.target.value)} required />
+          </div>
 
-          <button type="submit">Login</button>
+          <button type="submit" className="btn-primary">
+            Login
+          </button>
         </form>
 
-        <button onClick={onToggle}>Don't have an account? Register</button>
+        <div className="auth-toggle">
+          <button onClick={onToggle}>Don't have an account? Register</button>
+        </div>
       </div>
     </div>
   );
 };
 
-// =========================
 // Register Component
-// =========================
-
 const Register: React.FC<{ onToggle: () => void }> = ({ onToggle }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
   const { register } = useAuth();
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [err, setErr] = useState("");
 
-  const submit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     try {
-      setErr("");
       await register(email, password, name);
     } catch {
-      setErr("Registration failed");
+      setError('Registration failed');
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>🍬 Sweet Shop</h1>
+        <div className="auth-header">
+          <div className="emoji">🍬</div>
+          <h1>Sweet Shop</h1>
+          <p>Create your account</p>
+        </div>
 
-        <form onSubmit={submit}>
-          {err && <div className="error">{err}</div>}
-          <input placeholder="Name" required onChange={(e) => setName(e.target.value)} />
-          <input placeholder="Email" required onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" required minLength={6} onChange={(e) => setPassword(e.target.value)} />
+        <form onSubmit={handleSubmit} className="auth-form">
+          {error && <div className="error-message">{error}</div>}
 
-          <button type="submit">Register</button>
+          <div className="form-group">
+            <label>Name</label>
+            <input value={name}
+              onChange={(e) => setName(e.target.value)} required />
+          </div>
+
+          <div className="form-group">
+            <label>Email</label>
+            <input type="email" value={email}
+              onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+
+          <div className="form-group">
+            <label>Password</label>
+            <input type="password" value={password}
+              onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+          </div>
+
+          <button type="submit" className="btn-primary">
+            Register
+          </button>
         </form>
 
-        <button onClick={onToggle}>Already have an account? Login</button>
+        <div className="auth-toggle">
+          <button onClick={onToggle}>
+            Already have an account? Login
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-// =========================
 // Edit Sweet Modal
-// =========================
-
-const EditSweetModal = ({
-  token,
-  sweet,
-  onClose,
-  onSuccess,
-}: {
+const EditSweetModal: React.FC<{
   token: string;
   sweet: Sweet;
   onClose: () => void;
   onSuccess: () => void;
-}) => {
+}> = ({ token, sweet, onClose, onSuccess }) => {
+
   const [name, setName] = useState(sweet.name);
   const [category, setCategory] = useState(sweet.category);
   const [price, setPrice] = useState(String(sweet.price));
   const [quantity, setQuantity] = useState(String(sweet.quantity));
 
-  const submit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     await fetch(`${API_URL}/api/sweets/${sweet.id}`, {
@@ -252,7 +236,6 @@ const EditSweetModal = ({
     });
 
     onSuccess();
-    onClose();
   };
 
   return (
@@ -260,42 +243,60 @@ const EditSweetModal = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h2>Edit Sweet</h2>
 
-        <form onSubmit={submit}>
-          <input value={name} onChange={(e) => setName(e.target.value)} required />
-          <input value={category} onChange={(e) => setCategory(e.target.value)} required />
-          <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
-          <input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} required />
+        <form onSubmit={handleSubmit} className="modal-form">
+          <div className="form-group">
+            <label>Name</label>
+            <input value={name}
+              onChange={(e) => setName(e.target.value)} required />
+          </div>
 
-          <button type="submit">Update</button>
-          <button type="button" onClick={onClose}>
-            Cancel
-          </button>
+          <div className="form-group">
+            <label>Category</label>
+            <input value={category}
+              onChange={(e) => setCategory(e.target.value)} required />
+          </div>
+
+          <div className="form-group">
+            <label>Price</label>
+            <input type="number" value={price}
+              onChange={(e) => setPrice(e.target.value)} required />
+          </div>
+
+          <div className="form-group">
+            <label>Quantity</label>
+            <input type="number" value={quantity}
+              onChange={(e) => setQuantity(e.target.value)} required />
+          </div>
+
+          <div className="modal-actions">
+            <button type="button" className="btn-cancel" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-submit">
+              Save Changes
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
 
-// =========================
 // Add Sweet Modal
-// =========================
-
-const AddSweetModal = ({
-  token,
-  onClose,
-  onSuccess,
-}: {
+const AddSweetModal: React.FC<{
   token: string;
   onClose: () => void;
   onSuccess: () => void;
-}) => {
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
-  const [price, setPrice] = useState("");
-  const [quantity, setQuantity] = useState("");
+}> = ({ token, onClose, onSuccess }) => {
 
-  const submit = async (e: React.FormEvent) => {
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+  const [price, setPrice] = useState('');
+  const [quantity, setQuantity] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     await fetch(`${API_URL}/api/sweets`, {
       method: "POST",
       headers: {
@@ -311,7 +312,6 @@ const AddSweetModal = ({
     });
 
     onSuccess();
-    onClose();
   };
 
   return (
@@ -319,36 +319,69 @@ const AddSweetModal = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h2>Add New Sweet</h2>
 
-        <form onSubmit={submit}>
-          <input placeholder="Name" required onChange={(e) => setName(e.target.value)} />
-          <input placeholder="Category" required onChange={(e) => setCategory(e.target.value)} />
-          <input placeholder="Price" required type="number" step="0.01" onChange={(e) => setPrice(e.target.value)} />
-          <input placeholder="Quantity" required type="number" onChange={(e) => setQuantity(e.target.value)} />
+        <form onSubmit={handleSubmit} className="modal-form">
+          <div className="form-group">
+            <label>Name</label>
+            <input value={name}
+              onChange={(e) => setName(e.target.value)} required />
+          </div>
 
-          <button type="submit">Add</button>
-          <button type="button" onClick={onClose}>
-            Cancel
-          </button>
+          <div className="form-group">
+            <label>Category</label>
+            <input value={category}
+              onChange={(e) => setCategory(e.target.value)} required />
+          </div>
+
+          <div className="form-group">
+            <label>Price</label>
+            <input type="number" value={price}
+              onChange={(e) => setPrice(e.target.value)} required />
+          </div>
+
+          <div className="form-group">
+            <label>Quantity</label>
+            <input type="number" value={quantity}
+              onChange={(e) => setQuantity(e.target.value)} required />
+          </div>
+
+          <div className="modal-actions">
+            <button type="button" className="btn-cancel" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-submit">
+              Add Sweet
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
 
-// =========================
 // Dashboard
-// =========================
-
 const Dashboard: React.FC = () => {
   const { user, token, logout } = useAuth();
-  const { dark, setDark } = useDarkMode();
-
   const [sweets, setSweets] = useState<Sweet[]>([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editSweet, setEditSweet] = useState<Sweet | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [showAdd, setShowAdd] = useState(false);
-  const [editSweet, setEditSweet] = useState<Sweet | null>(null);
+  // Dark mode
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
+
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark-mode");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.body.classList.remove("dark-mode");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     fetchSweets();
@@ -356,160 +389,208 @@ const Dashboard: React.FC = () => {
 
   const fetchSweets = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/sweets`, {
+      const response = await fetch(`${API_URL}/api/sweets`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (res.status === 401) {
-        logout();
-        return;
-      }
-
-      const data = await res.json();
-      setSweets(Array.isArray(data) ? data : data.sweets || []);
-    } catch (err) {
+      const data = await response.json();
+      setSweets(data.sweets || []);
+    } catch {
       console.error("Failed to fetch sweets");
-      setSweets([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredSweets = (Array.isArray(sweets) ? sweets : []).filter(
-    (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.category.toLowerCase().includes(search.toLowerCase())
+  const handlePurchase = async (id: string) => {
+    try {
+      await fetch(`${API_URL}/api/sweets/${id}/purchase`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ quantity: 1 }),
+      });
+
+      fetchSweets();
+    } catch {
+      alert("Purchase failed");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this sweet?")) return;
+
+    try {
+      await fetch(`${API_URL}/api/sweets/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      fetchSweets();
+    } catch {
+      alert("Delete failed");
+    }
+  };
+
+  const filteredSweets = sweets.filter(
+    (sweet) =>
+      sweet.name.toLowerCase().includes(search.toLowerCase()) ||
+      sweet.category.toLowerCase().includes(search.toLowerCase())
   );
-
-  const purchase = async (id: string) => {
-    await fetch(`${API_URL}/api/sweets/${id}/purchase`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ quantity: 1 }),
-    });
-    fetchSweets();
-  };
-
-  const deleteSweet = async (id: string) => {
-    if (!confirm("Delete sweet?")) return;
-
-    await fetch(`${API_URL}/api/sweets/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    fetchSweets();
-  };
 
   return (
     <div className="dashboard">
       <nav className="navbar">
-        <h1>🍬 Sweet Shop</h1>
+        <div className="nav-content">
+          <div className="nav-brand">
+            <span className="nav-emoji">🍬</span>
+            <h1>Sweet Shop</h1>
+          </div>
 
-        <div>
-          <button onClick={() => setDark(!dark)}>
-            {dark ? "☀️ Light Mode" : "🌙 Dark Mode"}
-          </button>
+          <div className="nav-actions">
+            <button className="btn-darkmode" onClick={() => setDarkMode(!darkMode)}>
+              {darkMode ? "☀️ Light" : "🌙 Dark"}
+            </button>
 
-          <span>{user?.name} ({user?.role})</span>
-          <button onClick={logout}>Logout</button>
+            <span className="user-info">
+              {user?.name} {user?.role === "ADMIN" && "(Admin)"}
+            </span>
+
+            <button className="btn-logout" onClick={logout}>
+              Logout
+            </button>
+          </div>
         </div>
       </nav>
 
-      <div className="content">
-        <input
-          placeholder="Search sweets"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div className="main-content">
+        <div className="controls">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search sweets..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
 
-        {user?.role === "ADMIN" && (
-          <button onClick={() => setShowAdd(true)}>Add Sweet</button>
-        )}
+          {user?.role === "ADMIN" && (
+            <button className="btn-add" onClick={() => setShowAddModal(true)}>
+              Add Sweet
+            </button>
+          )}
+        </div>
 
         {loading ? (
-          <p>Loading...</p>
+          <div className="loading">Loading...</div>
         ) : (
-          <div className="grid">
+          <div className="sweets-grid">
             {filteredSweets.map((sweet) => (
               <div key={sweet.id} className="sweet-card">
+                <div className="sweet-emoji">🍭</div>
                 <h3>{sweet.name}</h3>
-                <p>{sweet.category}</p>
-                <p>${sweet.price}</p>
-                <p>{sweet.quantity} in stock</p>
+                <p className="category">{sweet.category}</p>
 
-                <button
-                  disabled={!sweet.quantity}
-                  onClick={() => purchase(sweet.id)}
-                >
-                  Purchase
-                </button>
+                <div className="sweet-details">
+                  <span className="price">${sweet.price.toFixed(2)}</span>
+                  <span className={`stock ${sweet.quantity > 0 ? "in-stock" : "out-stock"}`}>
+                    {sweet.quantity} in stock
+                  </span>
+                </div>
 
-                {user?.role === "ADMIN" && (
-                  <>
-                    <button onClick={() => setEditSweet(sweet)}>Edit</button>
-                    <button onClick={() => deleteSweet(sweet.id)}>
-                      Delete
-                    </button>
-                  </>
-                )}
+                <div className="sweet-actions">
+                  <button
+                    className="btn-purchase"
+                    disabled={sweet.quantity === 0}
+                    onClick={() => handlePurchase(sweet.id)}
+                  >
+                    Purchase
+                  </button>
+
+                  {user?.role === "ADMIN" && (
+                    <div className="admin-actions">
+                      <button
+                        className="btn-edit"
+                        onClick={() => {
+                          setEditSweet(sweet);
+                          setShowEditModal(true);
+                        }}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDelete(sweet.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         )}
+
+        {!loading && filteredSweets.length === 0 && (
+          <div className="no-results">No sweets found</div>
+        )}
       </div>
 
-      {showAdd && (
+      {showAddModal && (
         <AddSweetModal
           token={token!}
-          onSuccess={fetchSweets}
-          onClose={() => setShowAdd(false)}
+          onClose={() => setShowAddModal(false)}
+          onSuccess={() => {
+            setShowAddModal(false);
+            fetchSweets();
+          }}
         />
       )}
 
-      {editSweet && (
+      {showEditModal && editSweet && (
         <EditSweetModal
           token={token!}
           sweet={editSweet}
-          onClose={() => setEditSweet(null)}
-          onSuccess={fetchSweets}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={() => {
+            setShowEditModal(false);
+            fetchSweets();
+          }}
         />
       )}
     </div>
   );
 };
 
-// =========================
 // Main App
-// =========================
-
 const App: React.FC = () => {
   const [showLogin, setShowLogin] = useState(true);
+
+  return (
+    <AuthProvider>
+      <AuthWrapper showLogin={showLogin} setShowLogin={setShowLogin} />
+    </AuthProvider>
+  );
+};
+
+const AuthWrapper: React.FC<{
+  showLogin: boolean;
+  setShowLogin: (show: boolean) => void;
+}> = ({ showLogin, setShowLogin }) => {
   const { user } = useAuth();
 
-  if (!user)
+  if (!user) {
     return showLogin ? (
       <Login onToggle={() => setShowLogin(false)} />
     ) : (
       <Register onToggle={() => setShowLogin(true)} />
     );
+  }
 
   return <Dashboard />;
 };
 
-// =========================
-// Export Wrapper
-// =========================
-
-export default function Wrapper() {
-  return (
-    <DarkModeProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </DarkModeProvider>
-  );
-}
+export default App;

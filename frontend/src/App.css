@@ -468,3 +468,48 @@ body {
     padding: 30px 20px;
   }
 }
+/* ---------- DARK MODE ---------- */
+
+.dark-mode {
+  background: #111 !important;
+  color: #fff !important;
+}
+
+.dark-mode .auth-card,
+.dark-mode .sweet-card,
+.dark-mode .modal-content,
+.dark-mode .navbar {
+  background: #1e1e1e !important;
+  color: white !important;
+  box-shadow: 0 0 20px rgba(255,255,255,0.05) !important;
+}
+
+.dark-mode input {
+  background: #2c2c2c;
+  color: white;
+  border-color: #444;
+}
+
+.dark-mode .btn-primary,
+.dark-mode .btn-submit,
+.dark-mode .btn-purchase,
+.dark-mode .btn-add {
+  background: linear-gradient(135deg, #4b6cb7, #182848) !important;
+}
+
+.dark-mode .btn-delete {
+  background: #b40000 !important;
+}
+
+.btn-darkmode {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: #eee;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dark-mode .btn-darkmode {
+  background: #333;
+  color: white;
+}
