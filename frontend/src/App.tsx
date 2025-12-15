@@ -23,6 +23,8 @@ interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
 }
+
+// ✅ Correct API URL Usage
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Auth Context
@@ -241,7 +243,7 @@ const Dashboard: React.FC = () => {
 
   const fetchSweets = async () => {
     try {
-      const response = await fetch('${API_URL}/api/sweets', {
+      const response = await fetch(`${API_URL}/api/sweets`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -393,7 +395,7 @@ const AddSweetModal: React.FC<{
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch('${API_URL}/api/sweets', {
+      await fetch(`${API_URL}/api/sweets`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -455,7 +457,7 @@ const AddSweetModal: React.FC<{
             />
           </div>
           <div className="modal-actions">
-            <button type="button" onClick={onClose} className="btn-cancel">
+            <button type="button" onClick= {onClose} className="btn-cancel">
               Cancel
             </button>
             <button type="submit" className="btn-submit">
@@ -496,4 +498,4 @@ const AuthWrapper: React.FC<{
   return <Dashboard />;
 };
 
-export default App
+export default App;
