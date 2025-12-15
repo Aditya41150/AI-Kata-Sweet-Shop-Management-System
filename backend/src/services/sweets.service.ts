@@ -1,8 +1,6 @@
 import { Prisma } from "@prisma/client";
-import prisma from "../config/database";
-
-
-type Sweet = Prisma.Sweet;
+import prisma from "../config/database";  
+import type { Sweet } from "@prisma/client";
 
 interface CreateSweetData {
   name: string;
