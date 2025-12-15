@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import prisma from "../config/database";  
 import type { Sweet } from "@prisma/client";
 
@@ -35,7 +34,7 @@ export class SweetsService {
 
   async getAllSweets(): Promise<Sweet[]> {
     return this.prisma.sweet.findMany({
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -66,7 +65,7 @@ export class SweetsService {
 
     return this.prisma.sweet.update({
       where: { id },
-      data
+      data,
     });
   }
 
@@ -83,7 +82,7 @@ export class SweetsService {
 
     return this.prisma.sweet.update({
       where: { id },
-      data: { quantity: sweet.quantity - quantity }
+      data: { quantity: sweet.quantity - quantity },
     });
   }
 
@@ -95,7 +94,7 @@ export class SweetsService {
 
     return this.prisma.sweet.update({
       where: { id },
-      data: { quantity: sweet.quantity + quantity }
+      data: { quantity: sweet.quantity + quantity },
     });
   }
 }
