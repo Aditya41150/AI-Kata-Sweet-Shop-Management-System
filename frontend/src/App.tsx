@@ -24,6 +24,7 @@ interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
 }
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Auth Context
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
@@ -40,7 +41,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   }, [token]);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('http://localhost:3000/api/auth/login', {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -56,7 +57,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   };
 
   const register = async (email: string, password: string, name: string) => {
-    const response = await fetch('http://localhost:3000/api/auth/register', {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name })
