@@ -4,7 +4,8 @@ import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middleware/auth.middleware';
 
 const prisma = new PrismaClient();
-const sweetsService = new SweetsService(prisma);
+const sweetsService = new SweetsService();
+
 
 export class SweetsController {
   async create(req: AuthRequest, res: Response) {

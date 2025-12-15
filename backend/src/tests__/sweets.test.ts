@@ -9,7 +9,8 @@ describe('SweetsService', () => {
 
   beforeEach(() => {
     mockPrismaClient = new PrismaClient() as jest.Mocked<PrismaClient>;
-    sweetsService = new SweetsService(mockPrismaClient);
+    sweetsService = new SweetsService();
+
   });
 
   afterEach(() => {

@@ -1,4 +1,8 @@
-import { PrismaClient, Prisma, Sweet } from '@prisma/client';
+import { Prisma } from "@prisma/client";
+import prisma from "../config/database";
+
+// Prisma model types (Prisma 7 syntax)
+type Sweet = Prisma.SweetGetPayload<{}>;
 
 interface CreateSweetData {
   name: string;
@@ -6,7 +10,7 @@ interface CreateSweetData {
   price: number;
   quantity: number;
 }
-  
+
 interface UpdateSweetData {
   name?: string;
   category?: string;
@@ -22,29 +26,25 @@ interface SearchParams {
 }
 
 export class SweetsService {
-  private prisma: PrismaClient;
+  private prisma = prisma;
 
-  constructor(prismaClient: PrismaClient) {
-    this.prisma = prismaClient;
-  }
-
-  async createSweet(data: CreateSweetData): Promise<Prisma.SweetGetPayload<{}>> {
+  async createSweet(data: CreateSweetData): Promise<Sweet> {
     if (data.price <= 0) {
-      throw new Error('Price must be positive');
+      throw new Error("Price must be positive");
     }
 
     if (data.quantity < 0) {
-      throw new Error('Quantity cannot be negative');
+      throw new Error("Quantity cannot be negative");
     }
 
     return await this.prisma.sweet.create({
-      data
+      data,
     });
   }
 
   async getAllSweets(): Promise<Sweet[]> {
     return await this.prisma.sweet.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -54,14 +54,14 @@ export class SweetsService {
     if (params.name) {
       where.name = {
         contains: params.name,
-        mode: 'insensitive'
+        mode: "insensitive",
       };
     }
 
     if (params.category) {
       where.category = {
         contains: params.category,
-        mode: 'insensitive'
+        mode: "insensitive",
       };
     }
 
@@ -75,75 +75,73 @@ export class SweetsService {
       }
     }
 
-    return await this.prisma.sweet.findMany({
-      where
-    });
+    return await this.prisma.sweet.findMany({ where });
   }
 
   async updateSweet(id: string, data: UpdateSweetData): Promise<Sweet> {
     if (data.price !== undefined && data.price <= 0) {
-      throw new Error('Price must be positive');
+      throw new Error("Price must be positive");
     }
 
     if (data.quantity !== undefined && data.quantity < 0) {
-      throw new Error('Quantity cannot be negative');
+      throw new Error("Quantity cannot be negative");
     }
 
     return await this.prisma.sweet.update({
       where: { id },
-      data
+      data,
     });
   }
 
   async deleteSweet(id: string): Promise<Sweet> {
     return await this.prisma.sweet.delete({
-      where: { id }
+      where: { id },
     });
   }
 
   async purchase(id: string, quantity: number): Promise<Sweet> {
     if (quantity <= 0) {
-      throw new Error('Purchase quantity must be positive');
+      throw new Error("Purchase quantity must be positive");
     }
 
     const sweet = await this.prisma.sweet.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!sweet) {
-      throw new Error('Sweet not found');
+      throw new Error("Sweet not found");
     }
 
     if (sweet.quantity < quantity) {
-      throw new Error('Insufficient quantity available');
+      throw new Error("Insufficient quantity available");
     }
 
     return await this.prisma.sweet.update({
       where: { id },
       data: {
-        quantity: sweet.quantity - quantity
-      }
+        quantity: sweet.quantity - quantity,
+      },
     });
   }
 
   async restock(id: string, quantity: number): Promise<Sweet> {
     if (quantity <= 0) {
-      throw new Error('Restock quantity must be positive');
+      throw new Error("Restock quantity must be positive");
     }
 
     const sweet = await this.prisma.sweet.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!sweet) {
-      throw new Error('Sweet not found');
+      throw new Error("Sweet not found");
     }
 
     return await this.prisma.sweet.update({
       where: { id },
       data: {
-        quantity: sweet.quantity + quantity
-      }
+        quantity: sweet.quantity + quantity,
+      },
     });
   }
 }
