@@ -242,7 +242,7 @@ const Dashboard: React.FC = () => {
 
   const fetchSweets = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/sweets', {
+      const response = await fetch('${API_URL}/api/sweets', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -256,7 +256,7 @@ const Dashboard: React.FC = () => {
 
   const handlePurchase = async (id: string) => {
     try {
-      await fetch(`http://localhost:3000/api/sweets/${id}/purchase`, {
+      await fetch(`${API_URL}/api/sweets/${id}/purchase`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -274,7 +274,7 @@ const Dashboard: React.FC = () => {
     if (!confirm('Are you sure you want to delete this sweet?')) return;
     
     try {
-      await fetch(`http://localhost:3000/api/sweets/${id}`, {
+      await fetch(`${API_URL}/api/sweets/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -394,7 +394,7 @@ const AddSweetModal: React.FC<{
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch('http://localhost:3000/api/sweets', {
+      await fetch('${API_URL}/api/sweets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
