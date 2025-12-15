@@ -1,7 +1,8 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import prisma from "../config/database";
 
-type Sweet = Prisma.SweetGetPayload<{}>;
+
+type Sweet = Prisma.Sweet;
 
 interface CreateSweetData {
   name: string;
@@ -25,122 +26,78 @@ interface SearchParams {
 }
 
 export class SweetsService {
-  constructor(private prismaClient: PrismaClient = prisma) {}
+  private prisma = prisma;
 
   async createSweet(data: CreateSweetData): Promise<Sweet> {
-    if (data.price <= 0) {
-      throw new Error("Price must be positive");
-    }
+    if (data.price <= 0) throw new Error("Price must be positive");
+    if (data.quantity < 0) throw new Error("Quantity cannot be negative");
 
-    if (data.quantity < 0) {
-      throw new Error("Quantity cannot be negative");
-    }
-
-    return await this.prismaClient.sweet.create({
-      data,
-    });
+    return this.prisma.sweet.create({ data });
   }
 
   async getAllSweets(): Promise<Sweet[]> {
-    return await this.prismaClient.sweet.findMany({
-      orderBy: { createdAt: "desc" },
+    return this.prisma.sweet.findMany({
+      orderBy: { createdAt: "desc" }
     });
   }
 
   async searchSweets(params: SearchParams): Promise<Sweet[]> {
     const where: any = {};
 
-    if (params.name) {
-      where.name = {
-        contains: params.name,
-        mode: "insensitive",
-      };
-    }
+    if (params.name)
+      where.name = { contains: params.name, mode: "insensitive" };
 
-    if (params.category) {
-      where.category = {
-        contains: params.category,
-        mode: "insensitive",
-      };
-    }
+    if (params.category)
+      where.category = { contains: params.category, mode: "insensitive" };
 
     if (params.minPrice !== undefined || params.maxPrice !== undefined) {
       where.price = {};
-      if (params.minPrice !== undefined) {
-        where.price.gte = params.minPrice;
-      }
-      if (params.maxPrice !== undefined) {
-        where.price.lte = params.maxPrice;
-      }
+      if (params.minPrice !== undefined) where.price.gte = params.minPrice;
+      if (params.maxPrice !== undefined) where.price.lte = params.maxPrice;
     }
 
-    return await this.prismaClient.sweet.findMany({ where });
+    return this.prisma.sweet.findMany({ where });
   }
 
   async updateSweet(id: string, data: UpdateSweetData): Promise<Sweet> {
-    if (data.price !== undefined && data.price <= 0) {
+    if (data.price !== undefined && data.price <= 0)
       throw new Error("Price must be positive");
-    }
 
-    if (data.quantity !== undefined && data.quantity < 0) {
+    if (data.quantity !== undefined && data.quantity < 0)
       throw new Error("Quantity cannot be negative");
-    }
 
-    return await this.prismaClient.sweet.update({
+    return this.prisma.sweet.update({
       where: { id },
-      data,
+      data
     });
   }
 
   async deleteSweet(id: string): Promise<Sweet> {
-    return await this.prismaClient.sweet.delete({
-      where: { id },
-    });
+    return this.prisma.sweet.delete({ where: { id } });
   }
 
   async purchase(id: string, quantity: number): Promise<Sweet> {
-    if (quantity <= 0) {
-      throw new Error("Purchase quantity must be positive");
-    }
+    if (quantity <= 0) throw new Error("Purchase quantity must be positive");
 
-    const sweet = await this.prismaClient.sweet.findUnique({
+    const sweet = await this.prisma.sweet.findUnique({ where: { id } });
+    if (!sweet) throw new Error("Sweet not found");
+    if (sweet.quantity < quantity) throw new Error("Insufficient quantity");
+
+    return this.prisma.sweet.update({
       where: { id },
-    });
-
-    if (!sweet) {
-      throw new Error("Sweet not found");
-    }
-
-    if (sweet.quantity < quantity) {
-      throw new Error("Insufficient quantity available");
-    }
-
-    return await this.prismaClient.sweet.update({
-      where: { id },
-      data: {
-        quantity: sweet.quantity - quantity,
-      },
+      data: { quantity: sweet.quantity - quantity }
     });
   }
 
   async restock(id: string, quantity: number): Promise<Sweet> {
-    if (quantity <= 0) {
-      throw new Error("Restock quantity must be positive");
-    }
+    if (quantity <= 0) throw new Error("Restock quantity must be positive");
 
-    const sweet = await this.prismaClient.sweet.findUnique({
+    const sweet = await this.prisma.sweet.findUnique({ where: { id } });
+    if (!sweet) throw new Error("Sweet not found");
+
+    return this.prisma.sweet.update({
       where: { id },
-    });
-
-    if (!sweet) {
-      throw new Error("Sweet not found");
-    }
-
-    return await this.prismaClient.sweet.update({
-      where: { id },
-      data: {
-        quantity: sweet.quantity + quantity,
-      },
+      data: { quantity: sweet.quantity + quantity }
     });
   }
 }
